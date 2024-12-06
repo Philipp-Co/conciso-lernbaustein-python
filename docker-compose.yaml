@@ -1,6 +1,7 @@
 version: "3.7"
 
 services:
+# ---------------------------------------------------------------------------------------------------------------------
   database:
     image: postgres:latest
     container_name: database
@@ -8,10 +9,10 @@ services:
     environment:
       - POSTGRES_USER=client
       - POSTGRES_PASSWORD=geheim
-      - POSTGRES_DB=clp
+      - POSTGRES_DB=postgres
       - PGUSER=client
       - PGPASSWORD=geheim
-      - PGDATABASE=clp
+      - PGDATABASE=postgres
     volumes:
       - ./docker_compose/pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -19,4 +20,33 @@ services:
       interval: 1s
       timeout: 5s
       retries: 10
-
+# ---------------------------------------------------------------------------------------------------------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    command: [start-dev, --import-realm, --log-level=info, --log=console]
+    #command: [start-dev, --log-level=info, --log=console]
+    container_name: iam
+    tty: true
+    volumes:
+      - ./docker_compose/keycloak/:/opt/keycloak/data/
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_HEALTH_ENABLED=true
+      - KC_PROXY=edge
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://database/postgres
+      - KC_DB_USERNAME=client
+      - KC_DB_PASSWORD=geheim
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e \"GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3"]
+      interval: 1s
+      timeout: 5s
+      retries: 60
+# ---------------------------------------------------------------------------------------------------------------------

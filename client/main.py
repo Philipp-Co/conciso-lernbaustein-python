@@ -7,7 +7,7 @@ import sys
 from logging import Formatter, StreamHandler, getLogger
 from sys import argv
 
-from interfaces.iclient_factory import IClientFactory
+from interfaces.iclient_factory import ClientFactory
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -45,6 +45,6 @@ if __name__ == "__main__":
     # reassign loglevel according to arguments.
     rootlogger.setLevel(known_args.log_level if isinstance(known_args.log_level, str) else known_args.log_level[0])
     # start client.
-    exit(IClientFactory(rootlogger).create(known_args.module_path[0], known_args.class_name[0]).run(unknown_args))
+    exit(ClientFactory(rootlogger).create(known_args.module_path[0], known_args.class_name[0]).run(unknown_args))
 exit(-1)
 # ---------------------------------------------------------------------------------------------------------------------

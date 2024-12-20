@@ -16,7 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from labyrinth.interfaces.register_adventurer import RegisterAdventurerView
+from labyrinth.interfaces.load_labyrinth import LabyrinthView
+from labyrinth.interfaces.navigate_labyrinth import NavigateLabyrinthView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('register/', RegisterAdventurerView.as_view()),
+    path('labyrinth/', LabyrinthView.as_view()),
+    path('labyrinth/navigate/<str:adventurer_name>/', NavigateLabyrinthView.as_view()),
 ]

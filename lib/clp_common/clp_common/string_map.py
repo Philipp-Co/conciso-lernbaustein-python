@@ -21,14 +21,16 @@
 """
 from typing_extensions import Self
 from typing import List
-from labyrinth import Element, Empty, DeadEnd, Start, End, Crossing, TCrossing, Edge, Hallway, Orientation
+from clp_common.labyrinth import Element, Empty, DeadEnd, Start, End, Crossing, TCrossing, Edge, Hallway, Orientation
 from copy import deepcopy
+from logging import Logger
 
 class StringLabyrinth:
 
-    def __init__(self):
+    def __init__(self, logger: Logger):
         self.__rows: List[List[str]] = []
         self.__elements: List[List[Element]] = []
+        self.__logger: Logger = logger
         pass
     
     def __parse_minus(self, x: int, y: int) -> Self:
@@ -202,10 +204,12 @@ class StringLabyrinth:
                         case _:
                             raise ValueError(f'x: {x-1}, y: {y-1} - "{self.__rows[y][x]}" is not valid.')
                 except ValueError:
-                    print(f'Unabel to parse character at {x-1}, {y-1}')
+                    self.__logger.error(f'Unabel to parse character at {x-1}, {y-1}')
         return self
 
     def __update_string_map(self, string: str) -> Self:
+        
+        self.__logger.info(f'Parse Labyrinth: "{string}"')
 
         rows = string.split('\n')
         num_rows = len(rows)
@@ -216,9 +220,10 @@ class StringLabyrinth:
         
         self.__rows = [[' ' for _j in range(0, max_col_len+2)] for _i in range(0, num_rows+2)]
         self.__elements  = [[Empty() for _j in range(0, max_col_len)] for _i in range(0, num_rows)]
+        self.__logger.info(rows)
         for i in range(0, len(self.__rows)-3):
             row = rows[i]
-            print(f'{i}  : {row}')
+            self.__logger.info(f'{i}  : {row}')
             for j in range(0, len(row)):
                 self.__rows[i+1][j+1] = rows[i][j]
         return self

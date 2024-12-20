@@ -1,4 +1,5 @@
 django
+djangorestframework
 pre-commit
 
 -e ../lib/clp_common/

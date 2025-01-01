@@ -31,15 +31,14 @@ Siehe auch unter https://docs.djangoproject.com/en/5.1/intro/tutorial01/
 
 Um das Dockerimage zu bauen
 
-    docker bla 
+    docker bla
 
-# Docker Compose 
+# Docker Compose
 
 Das Dockerimage kann ausserdem mit "docker compose" gebaut werden.
- 
+
     docker compose build labyrinth_server
 
 Starteb der Compose-Umgebung.
 
     docker compose up
-

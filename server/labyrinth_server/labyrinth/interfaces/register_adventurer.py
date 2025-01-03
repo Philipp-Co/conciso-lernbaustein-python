@@ -3,32 +3,52 @@
 A adventurers Name must be exactely one character.
 """
 
+#
+# ---------------------------------------------------------------------------------------------------------------------
+#
 
-from logging import Logger, getLogger
-from django.views.generic import View
-from django.http import HttpResponse
-from logging import getLogger, Logger
-from typing import Optional
-
-from labyrinth.domain.registration_service import AdventurerRegistrationService, AdventurerRegistrationResult
-from rest_framework.serializers import Serializer, CharField, BooleanField
-from json import loads, dumps
 from http import HTTPStatus
+from json import dumps, loads
+from logging import Logger, getLogger
+from typing import Any, Dict, Iterable, Optional
+
+from django.http import HttpRequest, HttpResponse
+from django.views.generic import View
+from labyrinth.domain.registration_service import (
+    AdventurerRegistrationResult,
+    AdventurerRegistrationService,
+)
+from rest_framework.serializers import BooleanField, CharField, Serializer
+
+#
+# ---------------------------------------------------------------------------------------------------------------------
+#
 
 
-class AdventurerRegistrationRequestSerializer(Serializer):
+class AdventurerRegistrationRequestSerializer(Serializer):  # type: ignore[misc]
     name = CharField(required=True)
-    labyrinth = CharField(required=True) 
+    labyrinth = CharField(required=True)
     pass
 
-class AdventurerRegistrationResponseSerializer(Serializer):
+
+#
+# ---------------------------------------------------------------------------------------------------------------------
+#
+
+
+class AdventurerRegistrationResponseSerializer(Serializer):  # type: ignore[misc]
     return_value = BooleanField(required=True)
     description = CharField(required=True)
     pass
 
-class RegisterAdventurerView(View):
-    
-    def __init__(self, *args, logger: Optional[Logger]=None, **kwargs):
+
+#
+# ---------------------------------------------------------------------------------------------------------------------
+#
+
+
+class RegisterAdventurerView(View):  # type: ignore[misc]
+    def __init__(self, *args: Iterable[Any], logger: Optional[Logger] = None, **kwargs: Dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
         self.__logger: Logger = logger if logger is not None else getLogger(self.__class__.__name__)
         pass
@@ -39,29 +59,27 @@ class RegisterAdventurerView(View):
             content=dumps(
                 AdventurerRegistrationResponseSerializer(
                     data={
-                        'return_value': return_value,
-                        'description': description,
+                        "return_value": return_value,
+                        "description": description,
                     }
-                ).initial_data 
-            )
+                ).initial_data
+            ),
         )
 
-
-    def post(self, request) -> HttpResponse:
+    def post(self, request: HttpRequest) -> HttpResponse:
+        """Registern an adventurer fur a known labyrinth."""
         serializer: AdventurerRegistrationRequestSerializer = AdventurerRegistrationRequestSerializer(
-            data=loads(
-                request.body.decode('utf-8')
-            )
+            data=loads(request.body.decode("utf-8"))
         )
         if not serializer.is_valid():
-            return self.__create_response(HTTPStatus.PRECONDITION_FAILED.value, False, 'Invalid Request Body.')
+            return self.__create_response(HTTPStatus.PRECONDITION_FAILED.value, False, "Invalid Request Body.")
 
         request_body = serializer.data
         result: AdventurerRegistrationResult = AdventurerRegistrationService(
-            getLogger('AdventurerRegistration').getChild(AdventurerRegistrationService.__name__)
+            getLogger("AdventurerRegistration").getChild(AdventurerRegistrationService.__name__)
         ).register_adventurer(
-            request_body['name'],
-            request_body['labyrinth'],
+            request_body["name"],
+            request_body["labyrinth"],
         )
 
         return self.__create_response(
@@ -71,3 +89,8 @@ class RegisterAdventurerView(View):
         )
 
     pass
+
+
+#
+# ---------------------------------------------------------------------------------------------------------------------
+#

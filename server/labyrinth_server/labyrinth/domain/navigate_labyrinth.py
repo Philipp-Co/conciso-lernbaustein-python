@@ -1,14 +1,26 @@
+"""Navigate the labyrinth."""
+
+# ---------------------------------------------------------------------------------------------------------------------
+#
 from dataclasses import dataclass
+
+#
 from logging import Logger
+from typing import Any, Dict
 
 from clp_common.labyrinth import Orientation
-from labyrinth.domain.result import Result
 from labyrinth.models.adventurer import Adventurer
-from labyrinth.models.labyrinth import Labyrinth, LabyrinthTile
+from labyrinth.models.labyrinth import LabyrinthTile
+
+#
+# ---------------------------------------------------------------------------------------------------------------------
+#
 
 
 @dataclass
 class AdventurerPosition:
+    """Dataclass."""
+
     return_value: bool
     solved: bool
     description: str
@@ -18,7 +30,8 @@ class AdventurerPosition:
     south_tile: str
     west_tile: str
 
-    def to_json_serializable(self):
+    def to_json_serializable(self) -> Dict[str, Any]:
+        """Convert this instance to a JSON convertable object."""
         return {
             "return_value": self.return_value,
             "solved": self.solved,
@@ -33,13 +46,21 @@ class AdventurerPosition:
     pass
 
 
+#
+# ---------------------------------------------------------------------------------------------------------------------
+#
+
+
 @dataclass
 class AdventurerMoveResult:
+    """Dataclass."""
+
     return_value: bool
     solved: bool
     description: str
 
-    def to_json_serializable(self):
+    def to_json_serializable(self) -> Dict[str, Any]:
+        """Convert this instance to a JSON convertable object."""
         return {
             "return_value": self.return_value,
             "solved": self.solved,
@@ -49,12 +70,21 @@ class AdventurerMoveResult:
     pass
 
 
+#
+# ---------------------------------------------------------------------------------------------------------------------
+#
+
+
 class LabyrinthNavigator:
+    """Navigate through the labyrinth."""
+
     def __init__(self, logger: Logger):
+        """C'tor."""
         self.__logger: Logger = logger
         pass
 
     def where_am_i(self, adventurer_name: str) -> AdventurerPosition:
+        """Get information about an adeventurers current position inside his labyrinth."""
         try:
             adventurer = Adventurer.objects.get(name=adventurer_name)
             current_tile: LabyrinthTile = adventurer.current_tile
@@ -68,7 +98,7 @@ class LabyrinthNavigator:
                 south_tile=current_tile.neighbor_south,
                 west_tile=current_tile.neighbor_west,
             )
-        except:
+        except:  # noqa: E722
             return AdventurerPosition(
                 return_value=False,
                 solved=False,
@@ -81,7 +111,7 @@ class LabyrinthNavigator:
             )
 
     def move(self, adventurer_name: str, orientation: Orientation) -> AdventurerMoveResult:
-
+        """Make a move."""
         try:
             # get adventurer
             adventurer: Adventurer = Adventurer.objects.get(name=adventurer_name)
@@ -125,7 +155,8 @@ class LabyrinthNavigator:
                 y=adventurer.current_tile.y + delta_y,
             )
             self.__logger.info(
-                f"Adventurer {adventurer_name} steps on tile x: {adventurer.current_tile.x}, y: {adventurer.current_tile.y} ->  {adventurer.current_tile.tile}"
+                f"Adventurer {adventurer_name} steps on tile x: {adventurer.current_tile.x},"
+                f" y: {adventurer.current_tile.y} ->  {adventurer.current_tile.tile}"
             )
             adventurer.save()
             return AdventurerMoveResult(
@@ -142,3 +173,8 @@ class LabyrinthNavigator:
             )
 
     pass
+
+
+#
+# ---------------------------------------------------------------------------------------------------------------------
+#

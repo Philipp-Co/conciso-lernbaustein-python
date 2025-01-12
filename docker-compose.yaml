@@ -15,6 +15,8 @@ services:
       - PGDATABASE=postgres
     volumes:
       - ./docker_compose/pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready", "-U", "client", "-d", "clp"]
       interval: 1s
@@ -49,4 +51,19 @@ services:
       interval: 1s
       timeout: 5s
       retries: 60
+# ---------------------------------------------------------------------------------------------------------------------
+  server:
+    container_name: labyrinth_server
+    image: labyrinth_server
+    build:
+      context: ./server
+      dockerfile: dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - LABYRINTH_JWK_URL=http://keycloak:8080/realms/clp/protocol/openid-connect/certs
+      - LABYRINTH_DB_HOST=database
+    depends_on:
+      database:
+        condition: service_healthy
 # ---------------------------------------------------------------------------------------------------------------------

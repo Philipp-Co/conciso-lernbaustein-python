@@ -1,5 +1,11 @@
+gunicorn
 django
 djangorestframework
+djangorestframework-simplejwt[crypto]==5.3.1
+django-filter
+drf_spectacular
+psycopg[binary,pool]
+
 pre-commit
 
--e ../lib/clp_common/
+clp_common-0.0.0.tar.gz

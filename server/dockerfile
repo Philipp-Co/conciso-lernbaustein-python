@@ -1,0 +1,11 @@
+from python:3.10
+
+COPY ./clp_common-0.0.0.tar.gz clp_common-0.0.0.tar.gz
+COPY ./requirements.txt /requirements.txt
+COPY ./labyrinth_server /labyrinth_server
+COPY ./start.sh /start.sh
+RUN chmod +x /start.sh
+RUN pip install -r /requirements.txt
+
+WORKDIR /
+ENTRYPOINT [ "/start.sh" ]

@@ -2,7 +2,8 @@
 
 # ---------------------------------------------------------------------------------------------------------------------
 #
-from django.db.models import CASCADE, CharField, ForeignKey, Model
+from django.db.models import CASCADE, SET_NULL, CharField, ForeignKey, Model
+from labyrinth.models.client import Client
 
 #
 from labyrinth.models.labyrinth import Labyrinth, LabyrinthTile
@@ -14,6 +15,8 @@ from labyrinth.models.labyrinth import Labyrinth, LabyrinthTile
 
 class Adventurer(Model):  # type: ignore[misc]
     """An adventurer."""
+
+    client = ForeignKey(to=Client, on_delete=SET_NULL, null=True)
 
     # uniquely identify an adventurer who is solving a known labyrinth.
     name = CharField(max_length=32, unique=True)

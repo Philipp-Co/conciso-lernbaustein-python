@@ -13,12 +13,15 @@ from logging import Logger, getLogger
 from typing import Any, Dict, Iterable, Optional
 
 from django.http import HttpRequest, HttpResponse
-from django.views.generic import View
+from labyrinth.domain.authentication.token_user import LabyrinthTokenUser
+from labyrinth.domain.authentication.usage_allowed import UsageAllowed
 from labyrinth.domain.registration_service import (
     AdventurerRegistrationResult,
     AdventurerRegistrationService,
 )
+from rest_framework.decorators import permission_classes
 from rest_framework.serializers import BooleanField, CharField, Serializer
+from rest_framework.views import APIView
 
 #
 # ---------------------------------------------------------------------------------------------------------------------
@@ -47,7 +50,10 @@ class AdventurerRegistrationResponseSerializer(Serializer):  # type: ignore[misc
 #
 
 
-class RegisterAdventurerView(View):  # type: ignore[misc]
+class RegisterAdventurerView(APIView):  # type: ignore[misc]
+
+    # authentication_classes = [BasicAuthentication]
+
     def __init__(self, *args: Iterable[Any], logger: Optional[Logger] = None, **kwargs: Dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
         self.__logger: Logger = logger if logger is not None else getLogger(self.__class__.__name__)
@@ -66,8 +72,20 @@ class RegisterAdventurerView(View):  # type: ignore[misc]
             ),
         )
 
+    @permission_classes([UsageAllowed])  # type: ignore[misc]
     def post(self, request: HttpRequest) -> HttpResponse:
         """Registern an adventurer fur a known labyrinth."""
+        user = request.user
+        if not isinstance(user, LabyrinthTokenUser):
+            return self.__create_response(HTTPStatus.UNAUTHORIZED.value, False, "Please Authorize first...")
+        if not user.is_allowed_to_solve():
+            return self.__create_response(
+                HTTPStatus.UNAUTHORIZED.value,
+                False,
+                "Unzureichende Benutzerberechtigung um diese Funktion auszufuehren.",
+            )
+        self.__logger.info(user)
+        # self.__logger.info(request.auth)
         serializer: AdventurerRegistrationRequestSerializer = AdventurerRegistrationRequestSerializer(
             data=loads(request.body.decode("utf-8"))
         )
@@ -78,8 +96,9 @@ class RegisterAdventurerView(View):  # type: ignore[misc]
         result: AdventurerRegistrationResult = AdventurerRegistrationService(
             getLogger("AdventurerRegistration").getChild(AdventurerRegistrationService.__name__)
         ).register_adventurer(
-            request_body["name"],
-            request_body["labyrinth"],
+            client_name=user.user_name(),
+            name=request_body["name"],
+            labyrinth_name=request_body["labyrinth"],
         )
 
         return self.__create_response(

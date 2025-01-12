@@ -55,17 +55,25 @@
       "containerId" : "14cd7646-c41d-44d8-910f-fec3d52c2a5f",
       "attributes" : { }
     }, {
-      "id" : "0e4da892-5c9b-4a80-8b6f-7e28c375264b",
-      "name" : "offline_access",
-      "description" : "${role_offline-access}",
+      "id" : "b69ab5a2-8e5c-477c-b71e-8e1a68972cc1",
+      "name" : "darf_labyrinth_laden",
+      "description" : "Nutzer mit dieser Rolle dürfen ein neues Labyrinth laden.",
       "composite" : false,
       "clientRole" : false,
       "containerId" : "14cd7646-c41d-44d8-910f-fec3d52c2a5f",
       "attributes" : { }
     }, {
-      "id" : "c455452d-92ad-432c-809c-d0b6c694c65e",
-      "name" : "darf-app-nutzen",
-      "description" : "Der Benutzer darf die App nutzen.",
+      "id" : "94213f8d-473a-41a5-afca-6f71a391ee44",
+      "name" : "darf_labyrinth_loesen",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "14cd7646-c41d-44d8-910f-fec3d52c2a5f",
+      "attributes" : { }
+    }, {
+      "id" : "0e4da892-5c9b-4a80-8b6f-7e28c375264b",
+      "name" : "offline_access",
+      "description" : "${role_offline-access}",
       "composite" : false,
       "clientRole" : false,
       "containerId" : "14cd7646-c41d-44d8-910f-fec3d52c2a5f",
@@ -393,6 +401,26 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids" : [ ],
   "webAuthnPolicyPasswordlessExtraOrigins" : [ ],
   "users" : [ {
+    "id" : "db5890d0-3c3f-413a-820b-1239ba1caa80",
+    "createdTimestamp" : 1736496081863,
+    "username" : "philipp",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "credentials" : [ {
+      "id" : "6a8e27da-3d00-40b3-800a-6345f5667815",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1736496096129,
+      "secretData" : "{\"value\":\"BgmRdBajwJh486jba4/UMuIL+SmyDU620DEqIJf42ZI=\",\"salt\":\"Yvp2bwb4kFjiSkRWDLTXEA==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "darf_labyrinth_laden", "darf_labyrinth_loesen" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
     "id" : "7e9a95ad-ba66-42cc-9a70-8660870302ac",
     "createdTimestamp" : 1733502664975,
     "username" : "user",
@@ -412,7 +440,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "darf-app-nutzen" ],
+    "realmRoles" : [ "darf_labyrinth_loesen" ],
     "notBefore" : 0,
     "groups" : [ ]
   } ],

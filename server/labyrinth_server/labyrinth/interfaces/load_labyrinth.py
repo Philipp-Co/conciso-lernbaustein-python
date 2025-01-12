@@ -12,18 +12,21 @@ from logging import Logger, getLogger
 from typing import Any, Dict, Iterable, Optional
 
 from django.http import HttpRequest, HttpResponse
-from django.views.generic import View
+from labyrinth.domain.authentication.token_user import LabyrinthTokenUser
+from labyrinth.domain.authentication.usage_allowed import UsageAllowed
 from labyrinth.domain.labyrinth_instances import castle, castle1, simple
 from labyrinth.domain.load_labyrinth import (
     StringLabyrinthLoader,
     StringLabyrinthLoaderResult,
 )
+from rest_framework.decorators import permission_classes
 from rest_framework.serializers import (
     BooleanField,
     CharField,
     ListSerializer,
     Serializer,
 )
+from rest_framework.views import APIView
 
 #
 # ---------------------------------------------------------------------------------------------------------------------
@@ -61,7 +64,7 @@ class KnownLabyrinthsSerializer(Serializer):  # type: ignore[misc]
 #
 
 
-class LabyrinthView(View):  # type: ignore[misc]
+class LabyrinthView(APIView):  # type: ignore[misc]
     def __init__(self, *args: Iterable[Any], logger: Optional[Logger] = None, **kwargs: Dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
         self.__logger: Logger = logger if logger is not None else getLogger(self.__class__.__name__)
@@ -80,11 +83,23 @@ class LabyrinthView(View):  # type: ignore[misc]
             ),
         )
 
+    @permission_classes([UsageAllowed])  # type: ignore[misc]
     def get(self, request: HttpRequest) -> HttpResponse:
         """List the known labyrinths.
 
         This are the labyrinths an adventurer can register for and then solve.
         """
+        user = request.user
+        if not isinstance(user, LabyrinthTokenUser):
+            return self.__create_response(
+                HTTPStatus.UNAUTHORIZED.value, return_value=False, description="Bitte Authentifizieren!"
+            )
+        if not user.is_allowed_to_solve():
+            return self.__create_response(
+                HTTPStatus.UNAUTHORIZED.value,
+                return_value=False,
+                description=f"You are allowed: {user.is_allowed_to_solve()}",
+            )
         return HttpResponse(
             status=HTTPStatus.OK.value,
             content=dumps(
@@ -94,41 +109,57 @@ class LabyrinthView(View):  # type: ignore[misc]
             ),
         )
 
+    @permission_classes([UsageAllowed])  # type: ignore[misc]
     def post(self, request: HttpRequest) -> HttpResponse:
         """Create a Labyrinth."""
-        serializer: LoadLabyrinthRequestSerializer = LoadLabyrinthRequestSerializer(
-            data=loads(request.body.decode("utf-8"))
-        )
-        if not serializer.is_valid():
-            return self.__create_response(HTTPStatus.PRECONDITION_FAILED.value, False, "Invalid Request Body.")
-        request_body: Dict[str, Any] = serializer.data
-        instance: str
-        match request_body["name"]:
-            case "simple":
-                instance = simple
-                pass
-            case "castle":
-                instance = castle
-                pass
-            case "castle1":
-                instance = castle1
-                pass
-            case _:
-                return self.__create_response(
-                    HTTPStatus.OK.value,
-                    False,
-                    "Unknown Labyrinth instance.",
+        try:
+            user = request.user
+            if not isinstance(user, LabyrinthTokenUser) or (
+                isinstance(user, LabyrinthTokenUser) and not user.is_allowed_to_load_new()
+            ):
+                return HttpResponse(
+                    status=HTTPStatus.UNAUTHORIZED.value,
                 )
-        result: StringLabyrinthLoaderResult = StringLabyrinthLoader(
-            request_body["name"],
-            self.__logger.getChild(StringLabyrinthLoader.__name__),
-        ).load_from_string(instance)
+            serializer: LoadLabyrinthRequestSerializer = LoadLabyrinthRequestSerializer(
+                data=loads(request.body.decode("utf-8"))
+            )
+            if not serializer.is_valid():
+                return self.__create_response(HTTPStatus.PRECONDITION_FAILED.value, False, "Invalid Request Body.")
+            request_body: Dict[str, Any] = serializer.data
+            instance: str
+            match request_body["name"]:
+                case "simple":
+                    instance = simple
+                    pass
+                case "castle":
+                    instance = castle
+                    pass
+                case "castle1":
+                    instance = castle1
+                    pass
+                case _:
+                    return self.__create_response(
+                        HTTPStatus.OK.value,
+                        False,
+                        "Unknown Labyrinth instance.",
+                    )
+            result: StringLabyrinthLoaderResult = StringLabyrinthLoader(
+                request_body["name"],
+                self.__logger.getChild(StringLabyrinthLoader.__name__),
+            ).load_from_string(instance)
 
-        return self.__create_response(
-            HTTPStatus.OK.value,
-            result.return_value,
-            result.description,
-        )
+            return self.__create_response(
+                HTTPStatus.OK.value,
+                result.return_value,
+                result.description,
+            )
+        except Exception as e:
+            self.__logger.exception(e)
+            return self.__create_response(
+                HTTPStatus.INTERNAL_SERVER_ERROR.value,
+                False,
+                "Internal Server Error.",
+            )
 
     pass
 

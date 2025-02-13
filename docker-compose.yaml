@@ -36,10 +36,10 @@ services:
       - KEYCLOAK_ADMIN_PASSWORD=admin
       - KC_HEALTH_ENABLED=true
       - KC_PROXY=edge
-      - KC_DB=postgres
-      - KC_DB_URL=jdbc:postgresql://database/postgres
-      - KC_DB_USERNAME=client
-      - KC_DB_PASSWORD=geheim
+      #- KC_DB=postgres
+      #- KC_DB_URL=jdbc:postgresql://database/postgres
+      #- KC_DB_USERNAME=client
+      # - KC_DB_PASSWORD=geheim
     restart: unless-stopped
     ports:
       - "8080:8080"

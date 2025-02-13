@@ -42,6 +42,7 @@ if __name__ == "__main__":
     args = parser.parse_known_args(argv[1 : len(argv)])
     known_args = args[0]
     unknown_args = args[1]
+    rootlogger.info(f"Passing Args: {unknown_args} to client to client..")
     # reassign loglevel according to arguments.
     rootlogger.setLevel(known_args.log_level if isinstance(known_args.log_level, str) else known_args.log_level[0])
     # start client.

@@ -1,8 +1,0 @@
-setup.py
-clp_common/__init__.py
-clp_common/labyrinth.py
-clp_common/string_map.py
-mypythonlib.egg-info/PKG-INFO
-mypythonlib.egg-info/SOURCES.txt
-mypythonlib.egg-info/dependency_links.txt
-mypythonlib.egg-info/top_level.txt

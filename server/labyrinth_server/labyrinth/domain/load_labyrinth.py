@@ -86,9 +86,9 @@ class StringLabyrinthLoader:
         # The Last line is possibly empty...
         if len(lmap[-1]) == 0:
             lmap = lmap[0 : len(lmap) - 1]
-        self.__logger.info(f"Save Map ({len(lmap)}):")
-        for line in lmap:
-            self.__logger.info(line)
+        # self.__logger.info(f"Save Map ({len(lmap)}):")
+        # for line in lmap:
+        #    self.__logger.info(line)
 
         row: int
         col: int
